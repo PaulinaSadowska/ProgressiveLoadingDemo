@@ -17,7 +17,7 @@ class ImageFetcherSingleSubscribe(private val picasso: Picasso, private val url:
 
     override fun subscribe(emitter: SingleEmitter<FetchedBitmapWithQuality>) {
         val target = object : Target {
-            override fun onPrepareLoad(placeHolderDrawable: Drawable) {
+            override fun onPrepareLoad(placeHolderDrawable: Drawable?) {
                 //do nothing
             }
 
@@ -33,8 +33,7 @@ class ImageFetcherSingleSubscribe(private val picasso: Picasso, private val url:
         }
         runningTargets.add(target)
         emitter.setCancellable { removeTargetAndCancelRequest(target) }
-        picasso.load(url)
-                .into(target)
+        picasso.load(url).into(target)
     }
 
     private fun removeTargetAndCancelRequest(target: Target) {

@@ -17,7 +17,7 @@ import com.squareup.picasso.Picasso
  */
 class CustomPicassoDrawable private constructor(context: Context,
                                                 bitmap: Bitmap,
-                                                placeholder: Drawable,
+                                                placeholder: Drawable?,
                                                 loadedFrom: Picasso.LoadedFrom,
                                                 noFade: Boolean) : BitmapDrawable(context.resources, bitmap) {
 
