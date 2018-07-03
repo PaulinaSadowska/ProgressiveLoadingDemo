@@ -9,7 +9,7 @@ import io.reactivex.Single
  */
 class ImageFetcher(private val picasso: Picasso) {
 
-    fun loadImagesFromBuckets(url: String, badQuality: Int, bestQuality: Int): Observable<FetchedBitmapWithQuality> {
+    fun loadProgressively(url: String, badQuality: Int, bestQuality: Int): Observable<FetchedBitmapWithQuality> {
         val smallestImage = ImageUrlWithSize(url, badQuality)
         val mediumImage = ImageUrlWithSize(url, bestQuality)
 
@@ -29,4 +29,9 @@ class ImageFetcher(private val picasso: Picasso) {
     private fun loadImageAndSetBitmap(image: ImageUrlWithSize): Single<FetchedBitmapWithQuality> {
         return Single.create(ImageFetcherSingleSubscribe(picasso, image.urlWithSize, image.size))
     }
+
+    private class ImageUrlWithSize(url: String, val size: Int) {
+        val urlWithSize = "$url/$size/$size?image=0" //?image=0 added so image wont be random
+    }
 }
+

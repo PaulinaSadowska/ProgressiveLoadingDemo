@@ -11,7 +11,9 @@ import java.lang.Exception
 /**
  * Created by Paulina Sadowska on 03.07.2018.
  */
-class ImageFetcherSingleSubscribe(private val picasso: Picasso, private val url: String, private val quality: Int) : SingleOnSubscribe<FetchedBitmapWithQuality> {
+class ImageFetcherSingleSubscribe(private val picasso: Picasso,
+                                  private val url: String,
+                                  private val quality: Int) : SingleOnSubscribe<FetchedBitmapWithQuality> {
 
     private val runningTargets = mutableListOf<Target>()
 

@@ -10,7 +10,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
-    private val disposable = CompositeDisposable()
+    private val compositeDisposable = CompositeDisposable()
     private val fetcher: ImageFetcher
     private val bitmapApplier = FetchedBitmapApplier()
     private var currentQuality = -1
@@ -31,7 +31,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        disposable.add(fetcher.loadImagesFromBuckets(IMAGE_URL, BAD_QUALITY, BEST_QUALITY)
+        loadImages()
+    }
+
+    private fun loadImages() {
+        compositeDisposable.add(fetcher.loadProgressively(IMAGE_URL, BAD_QUALITY, BEST_QUALITY)
                 .doOnSubscribe { startLoading() }
                 .subscribeBy(
                         onNext = { applyImageIfHasBetterQuality(it) },
@@ -44,7 +48,7 @@ class MainActivity : AppCompatActivity() {
         stopLoading()
         if (currentQuality < fetchedBitmap.size) {
             currentQuality = fetchedBitmap.size
-            bitmapApplier.applyBitmap(loadedImage, fetchedBitmap.bitmap, fetchedBitmap.loadedFrom)
+            bitmapApplier.applyBitmap(imageView, fetchedBitmap.bitmap, fetchedBitmap.loadedFrom)
         }
     }
 
@@ -68,6 +72,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        disposable.dispose()
+        compositeDisposable.dispose()
     }
 }
