@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">ProgressiveLoadingDemo</string>
+    <string name="error_while_fetching_image">Fetching images failed</string>
 </resources>
