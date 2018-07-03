@@ -27,7 +27,7 @@ class ImageFetcherSingleSubscribe(private val picasso: Picasso, private val url:
             }
 
             override fun onBitmapFailed(e: Exception?, errorDrawable: Drawable?) {
-                emitter.tryOnError(ImageNotFetchedException(e?.message ?: "image not fetched"))
+                emitter.tryOnError(ImageNotFetchedException())
                 removeTargetAndCancelRequest(this)
             }
         }
