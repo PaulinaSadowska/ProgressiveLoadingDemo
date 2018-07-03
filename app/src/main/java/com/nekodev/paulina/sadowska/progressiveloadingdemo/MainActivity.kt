@@ -13,6 +13,6 @@ class MainActivity : AppCompatActivity() {
 
         Picasso.get()
                 .load("http://i.imgur.com/DvpvklR.png")
-                .into(loadedImage)
+                .into(imageView)
     }
 }
