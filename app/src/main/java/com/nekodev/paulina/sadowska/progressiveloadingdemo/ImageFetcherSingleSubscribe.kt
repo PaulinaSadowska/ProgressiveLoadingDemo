@@ -28,11 +28,12 @@ class ImageFetcherSingleSubscribe(private val picasso: Picasso,
                 removeTargetAndCancelRequest(this)
             }
 
-            override fun onBitmapFailed(e: Exception?, errorDrawable: Drawable?) {
-                emitter.tryOnError(ImageNotFetchedException())
+            override fun onBitmapFailed(e: Exception, errorDrawable: Drawable?) {
+                emitter.tryOnError(e)
                 removeTargetAndCancelRequest(this)
             }
         }
+
         runningTargets.add(target)
         emitter.setCancellable { removeTargetAndCancelRequest(target) }
         picasso.load(url).into(target)

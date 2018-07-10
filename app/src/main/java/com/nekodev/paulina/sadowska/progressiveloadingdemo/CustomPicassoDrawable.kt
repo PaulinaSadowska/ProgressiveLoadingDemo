@@ -33,7 +33,6 @@ class CustomPicassoDrawable private constructor(context: Context,
             this.animating = true
             this.startTimeMillis = SystemClock.uptimeMillis()
         }
-
     }
 
     companion object {

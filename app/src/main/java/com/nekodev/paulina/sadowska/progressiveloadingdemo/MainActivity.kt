@@ -12,7 +12,6 @@ class MainActivity : AppCompatActivity() {
 
     private val compositeDisposable = CompositeDisposable()
     private val fetcher: ImageFetcher
-    private val bitmapApplier = FetchedBitmapApplier()
     private var currentQuality = -1
 
     init {
@@ -23,8 +22,6 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         private const val IMAGE_URL = "https://picsum.photos"
-        private const val BAD_QUALITY = 100
-        private const val BEST_QUALITY = 2000
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,11 +32,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadImages() {
-        compositeDisposable.add(fetcher.loadProgressively(IMAGE_URL, BAD_QUALITY, BEST_QUALITY)
+        compositeDisposable.add(fetcher.loadProgressively(IMAGE_URL, listOf(50, 500, 2000, 5000))
                 .doOnSubscribe { startLoading() }
                 .subscribeBy(
                         onNext = { applyImageIfHasBetterQuality(it) },
-                        onError = { showError() },
+                        onError = {
+                            showError()
+                        },
                         onComplete = { showErrorIfShould() }
                 ))
     }
@@ -48,7 +47,12 @@ class MainActivity : AppCompatActivity() {
         stopLoading()
         if (currentQuality < fetchedBitmap.size) {
             currentQuality = fetchedBitmap.size
-            bitmapApplier.applyBitmap(imageView, fetchedBitmap.bitmap, fetchedBitmap.loadedFrom)
+            CustomPicassoDrawable
+                    .setBitmap(imageView,
+                            this,
+                            fetchedBitmap.bitmap,
+                            fetchedBitmap.loadedFrom,
+                            imageView.drawable == null)
         }
     }
 

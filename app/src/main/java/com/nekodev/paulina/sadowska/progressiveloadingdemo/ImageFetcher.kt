@@ -9,29 +9,21 @@ import io.reactivex.Single
  */
 class ImageFetcher(private val picasso: Picasso) {
 
-    fun loadProgressively(url: String, badQuality: Int, bestQuality: Int): Observable<FetchedBitmapWithQuality> {
-        val smallestImage = ImageUrlWithSize(url, badQuality)
-        val mediumImage = ImageUrlWithSize(url, bestQuality)
-
-        return loadProgressively(smallestImage, mediumImage)
+    fun loadProgressively(url: String, qualities: List<Int>): Observable<FetchedBitmapWithQuality> {
+        return qualities
+                .map { quality -> Pair(createUrl(url, quality), quality) }
+                .map { loadImageAndIgnoreError(it) }
+                .reduce { o1, o2 -> Observable.merge(o1, o2) }
     }
 
-    private fun loadProgressively(smallImage: ImageUrlWithSize, mediumImage: ImageUrlWithSize): Observable<FetchedBitmapWithQuality> {
-        return Observable.merge<FetchedBitmapWithQuality>(
-                loadImageAndIgnoreError(smallImage),
-                loadImageAndIgnoreError(mediumImage))
+    private fun loadImageAndIgnoreError(urlWithQuality: Pair<String, Int>): Observable<FetchedBitmapWithQuality> {
+        val (url, quality) = urlWithQuality
+        return Single
+                .create(ImageFetcherSingleSubscribe(picasso, url, quality))
+                .toObservable()
+                .onErrorResumeNext(Observable.empty<FetchedBitmapWithQuality>())
     }
 
-    private fun loadImageAndIgnoreError(image: ImageUrlWithSize): Observable<FetchedBitmapWithQuality> {
-        return loadImageAndSetBitmap(image).toObservable().onErrorResumeNext(Observable.empty<FetchedBitmapWithQuality>())
-    }
-
-    private fun loadImageAndSetBitmap(image: ImageUrlWithSize): Single<FetchedBitmapWithQuality> {
-        return Single.create(ImageFetcherSingleSubscribe(picasso, image.urlWithSize, image.size))
-    }
-
-    private class ImageUrlWithSize(url: String, val size: Int) {
-        val urlWithSize = "$url/$size/$size?image=0" //?image=0 added so image wont be random
-    }
+    private fun createUrl(url: String, size: Int): String = "$url/$size/$size?image=0" //?image=0 added so image wont be random
 }
 
