@@ -47,12 +47,7 @@ class MainActivity : AppCompatActivity() {
         stopLoading()
         if (currentQuality < fetchedBitmap.size) {
             currentQuality = fetchedBitmap.size
-            CustomPicassoDrawable
-                    .setBitmap(imageView,
-                            this,
-                            fetchedBitmap.bitmap,
-                            fetchedBitmap.loadedFrom,
-                            imageView.drawable == null)
+            imageView.setImageBitmap(fetchedBitmap.bitmap)
         }
     }
 
