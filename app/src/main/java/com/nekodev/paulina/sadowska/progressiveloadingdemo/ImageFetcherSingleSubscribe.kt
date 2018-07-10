@@ -13,18 +13,18 @@ import java.lang.Exception
  */
 class ImageFetcherSingleSubscribe(private val picasso: Picasso,
                                   private val url: String,
-                                  private val quality: Int) : SingleOnSubscribe<FetchedBitmapWithQuality> {
+                                  private val quality: Int) : SingleOnSubscribe<BitmapWithQuality> {
 
     private val runningTargets = mutableListOf<Target>()
 
-    override fun subscribe(emitter: SingleEmitter<FetchedBitmapWithQuality>) {
+    override fun subscribe(emitter: SingleEmitter<BitmapWithQuality>) {
         val target = object : Target {
             override fun onPrepareLoad(placeHolderDrawable: Drawable?) {
                 //do nothing
             }
 
             override fun onBitmapLoaded(bitmap: Bitmap, from: Picasso.LoadedFrom) {
-                emitter.onSuccess(FetchedBitmapWithQuality(bitmap, from, quality))
+                emitter.onSuccess(BitmapWithQuality(bitmap, quality))
                 removeTargetAndCancelRequest(this)
             }
 
