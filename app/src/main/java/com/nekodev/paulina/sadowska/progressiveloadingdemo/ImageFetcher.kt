@@ -9,19 +9,19 @@ import io.reactivex.Single
  */
 class ImageFetcher(private val picasso: Picasso) {
 
-    fun loadProgressively(url: String, qualities: List<Int>): Observable<FetchedBitmapWithQuality> {
+    fun loadProgressively(url: String, qualities: List<Int>): Observable<BitmapWithQuality> {
         return qualities
                 .map { quality -> Pair(createUrl(url, quality), quality) }
                 .map { loadImageAndIgnoreError(it) }
                 .reduce { o1, o2 -> Observable.merge(o1, o2) }
     }
 
-    private fun loadImageAndIgnoreError(urlWithQuality: Pair<String, Int>): Observable<FetchedBitmapWithQuality> {
+    private fun loadImageAndIgnoreError(urlWithQuality: Pair<String, Int>): Observable<BitmapWithQuality> {
         val (url, quality) = urlWithQuality
         return Single
                 .create(ImageFetcherSingleSubscribe(picasso, url, quality))
                 .toObservable()
-                .onErrorResumeNext(Observable.empty<FetchedBitmapWithQuality>())
+                .onErrorResumeNext(Observable.empty<BitmapWithQuality>())
     }
 
     private fun createUrl(url: String, size: Int): String = "$url/$size/$size?image=0" //?image=0 added so image wont be random

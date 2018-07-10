@@ -43,11 +43,11 @@ class MainActivity : AppCompatActivity() {
                 ))
     }
 
-    private fun applyImageIfHasBetterQuality(fetchedBitmap: FetchedBitmapWithQuality) {
+    private fun applyImageIfHasBetterQuality(bitmap: BitmapWithQuality) {
         stopLoading()
-        if (currentQuality < fetchedBitmap.size) {
-            currentQuality = fetchedBitmap.size
-            imageView.setImageBitmap(fetchedBitmap.bitmap)
+        if (currentQuality < bitmap.size) {
+            currentQuality = bitmap.size
+            imageView.setImageBitmap(bitmap.bitmap)
         }
     }
 
