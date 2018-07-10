@@ -10,15 +10,9 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
-    private val compositeDisposable = CompositeDisposable()
-    private val fetcher: ImageFetcher
+    private lateinit var disposable: CompositeDisposable
+    private lateinit var fetcher: ImageFetcher
     private var currentQuality = -1
-
-    init {
-        val picasso = Picasso.get()
-        picasso.isLoggingEnabled = true
-        fetcher = ImageFetcher(picasso)
-    }
 
     companion object {
         private const val IMAGE_URL = "https://picsum.photos"
@@ -27,18 +21,25 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        disposable = CompositeDisposable()
+        fetcher = createImageFetcher()
 
         loadImages()
     }
 
+    private fun createImageFetcher(): ImageFetcher {
+        return ImageFetcher(
+                Picasso.get()
+                        .apply { isLoggingEnabled = true }
+        )
+    }
+
     private fun loadImages() {
-        compositeDisposable.add(fetcher.loadProgressively(IMAGE_URL, listOf(50, 500, 2000, 5000))
+        disposable.add(fetcher.loadProgressively(IMAGE_URL, listOf(50, 500, 2000, 5000))
                 .doOnSubscribe { startLoading() }
                 .subscribeBy(
                         onNext = { applyImageIfHasBetterQuality(it) },
-                        onError = {
-                            showError()
-                        },
+                        onError = { showError() },
                         onComplete = { showErrorIfShould() }
                 ))
     }
@@ -71,6 +72,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        compositeDisposable.dispose()
+        disposable.dispose()
     }
 }
