@@ -2,8 +2,8 @@ package com.nekodev.paulina.sadowska.progressiveloadingdemo
 
 import android.arch.lifecycle.MutableLiveData
 import com.nekodev.paulina.sadowska.progressiveloadingdemo.fetcher.ImageFetcher
-import com.nekodev.paulina.sadowska.progressiveloadingdemo.fetcher.data.BitmapWithQuality
 import com.nekodev.paulina.sadowska.progressiveloadingdemo.fetcher.data.BitmapResult
+import com.nekodev.paulina.sadowska.progressiveloadingdemo.fetcher.data.BitmapWithQuality
 import com.squareup.picasso.Picasso
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.subscribeBy
@@ -24,8 +24,7 @@ class ImageViewModel {
         disposable.add(fetcher.loadProgressively(IMAGE_URL, qualities)
                 .subscribeBy(
                         onNext = { applyImageIfHasBetterQuality(it) },
-                        onError = { postError() },
-                        onComplete = { postErrorIfShould() }
+                        onComplete = { postErrorIfNotSufficientQuality() }
                 ))
     }
 
@@ -40,14 +39,10 @@ class ImageViewModel {
         return bitmapResult.value?.quality ?: -1
     }
 
-    private fun postErrorIfShould() {
+    private fun postErrorIfNotSufficientQuality() {
         if (getCurrentQuality() < 0) {
-            postError()
+            bitmapResult.value = BitmapResult.error()
         }
-    }
-
-    private fun postError() {
-        bitmapResult.value = BitmapResult.error()
     }
 
     fun unSubscribe() {
