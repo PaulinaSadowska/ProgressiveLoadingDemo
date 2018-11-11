@@ -1,5 +1,6 @@
-package com.nekodev.paulina.sadowska.progressiveloadingdemo
+package com.nekodev.paulina.sadowska.progressiveloadingdemo.fetcher
 
+import com.nekodev.paulina.sadowska.progressiveloadingdemo.fetcher.data.BitmapWithQuality
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
 import io.reactivex.SingleEmitter

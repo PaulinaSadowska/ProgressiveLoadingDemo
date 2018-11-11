@@ -1,69 +1,56 @@
 package com.nekodev.paulina.sadowska.progressiveloadingdemo
 
+import android.arch.lifecycle.Observer
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.View
-import com.squareup.picasso.Picasso
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.subscribeBy
+import com.nekodev.paulina.sadowska.progressiveloadingdemo.fetcher.data.BitmapResult
+import com.nekodev.paulina.sadowska.progressiveloadingdemo.fetcher.data.ResponseState
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var disposable: CompositeDisposable
-    private lateinit var fetcher: ImageFetcher
-    private var currentQuality = -1
-
-    companion object {
-        private const val IMAGE_URL = "https://picsum.photos"
-    }
+    private val viewModel = ImageViewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        disposable = CompositeDisposable()
-        fetcher = createImageFetcher()
 
-        loadImages()
+        viewModel.bitmapResult.observe(this, Observer<BitmapResult> { it -> process(it) })
+        viewModel.loadImages(listOf(3000, 70, 10))
     }
 
-    private fun createImageFetcher(): ImageFetcher {
-        return ImageFetcher(
-                Picasso.get()
-                        .apply { isLoggingEnabled = true }
-        )
-    }
-
-    private fun loadImages() {
-        disposable.add(fetcher.loadProgressively(IMAGE_URL, listOf(50, 500, 2000, 5000))
-                .doOnSubscribe { startLoading() }
-                .subscribeBy(
-                        onNext = { applyImageIfHasBetterQuality(it) },
-                        onError = { showError() },
-                        onComplete = { showErrorIfShould() }
-                ))
-    }
-
-    private fun applyImageIfHasBetterQuality(bitmap: BitmapWithQuality) {
-        stopLoading()
-        if (currentQuality < bitmap.size) {
-            currentQuality = bitmap.size
-            imageView.setImageBitmap(bitmap.bitmap)
+    private fun process(result: BitmapResult?) {
+        result?.let {
+            when (it.state) {
+                ResponseState.LOADING -> {
+                    showProgress()
+                }
+                ResponseState.ERROR -> {
+                    hideProgress()
+                    showError()
+                }
+                ResponseState.SUCCESS -> {
+                    hideProgress()
+                    it.bitmap?.let { bitmap ->
+                        showImage(bitmap)
+                    }
+                }
+            }
         }
     }
 
-    private fun startLoading() {
+    private fun showImage(bitmap: Bitmap) {
+        imageView.setImageBitmap(bitmap)
+    }
+
+    private fun showProgress() {
         loader.visibility = View.VISIBLE
     }
 
-    private fun stopLoading() {
+    private fun hideProgress() {
         loader.visibility = View.GONE
-    }
-
-    private fun showErrorIfShould() {
-        if (currentQuality < 0) {
-            showError()
-        }
     }
 
     private fun showError() {
@@ -72,6 +59,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        disposable.dispose()
+        viewModel.unSubscribe()
     }
 }
