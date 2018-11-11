@@ -16,8 +16,19 @@ class ImageFetcher(private val picasso: Picasso) {
                 .reduce { o1, o2 -> Observable.merge(o1, o2) }
     }
 
+    fun loadProgressively(url: String, quality1: Int, quality2: Int): Observable<BitmapWithQuality> {
+        return Observable.merge(
+                loadImageAndIgnoreError(createUrl(url, quality1), quality1),
+                loadImageAndIgnoreError(createUrl(url, quality2), quality2)
+        )
+    }
+
     private fun loadImageAndIgnoreError(urlWithQuality: Pair<String, Int>): Observable<BitmapWithQuality> {
         val (url, quality) = urlWithQuality
+        return loadImageAndIgnoreError(url, quality)
+    }
+
+    private fun loadImageAndIgnoreError(url: String, quality: Int): Observable<BitmapWithQuality> {
         return Single
                 .create(ImageFetcherSingleSubscribe(picasso, url, quality))
                 .toObservable()
