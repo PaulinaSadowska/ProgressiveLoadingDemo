@@ -18,7 +18,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         viewModel.bitmapResult.observe(this, Observer<BitmapResult> { it -> process(it) })
-        viewModel.loadImages(listOf(3000, 70, 10))
+        viewModel.loadImages(listOf(3000, 10, 300))
     }
 
     private fun process(result: BitmapResult?) {

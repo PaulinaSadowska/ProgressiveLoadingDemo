@@ -11,7 +11,7 @@ import io.reactivex.rxkotlin.subscribeBy
 class ImageViewModel {
 
     companion object {
-        private const val IMAGE_URL = "https://picsum.photos"
+        private const val BASE_IMAGE_URL = "https://picsum.photos"
     }
 
     private val disposable = CompositeDisposable()
@@ -21,24 +21,22 @@ class ImageViewModel {
 
     fun loadImages(qualities: List<Int>) {
         bitmapResult.value = BitmapResult.loading()
-        disposable.add(fetcher.loadProgressively(IMAGE_URL, qualities)
+        disposable.add(fetcher.loadProgressively(BASE_IMAGE_URL, qualities)
+                .filter { getCurrentQuality() < it.quality }
                 .subscribeBy(
-                        onNext = { applyImageIfHasBetterQuality(it) },
+                        onNext = { applyImage(it) },
                         onComplete = { postErrorIfNotSufficientQuality() }
                 ))
-    }
-
-
-    private fun applyImageIfHasBetterQuality(bitmap: BitmapWithQuality) {
-        if (getCurrentQuality() < bitmap.quality) {
-            bitmapResult.value = BitmapResult.success(bitmap)
-        }
     }
 
     private fun getCurrentQuality(): Int {
         return bitmapResult.value?.quality ?: -1
     }
 
+    private fun applyImage(bitmap: BitmapWithQuality) {
+        bitmapResult.value = BitmapResult.success(bitmap)
+    }
+    
     private fun postErrorIfNotSufficientQuality() {
         if (getCurrentQuality() < 0) {
             bitmapResult.value = BitmapResult.error()
